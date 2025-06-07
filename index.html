@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <title>Упражнения для глаз</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        html,body{height:100%;width:100%;overflow-x:hidden}
+        body{font-family:Arial,sans-serif;background:#F5F5DC;min-height:100vh;min-width:100vw;overflow:hidden;color:#222;line-height:1.4;font-size:12pt;position:relative}
+        .exercise-area{position:absolute;left:0;width:100%;z-index:10;background:#FAFAF6;color:#222;overflow:hidden;text-align:center}
+        .top-panel{position:fixed;top:0;left:0;width:100%;z-index:20;display:flex;flex-direction:column;align-items:center;gap:2px;background:rgba(250,250,246,.85);padding:4px 0 0 0}
+        .controls{display:flex;overflow-x:auto;gap:6px;padding:2px 0;flex-wrap:nowrap;align-items:center;width:100%;justify-content:flex-start;scrollbar-width:none;-ms-overflow-style:none}
+        .controls::-webkit-scrollbar{display:none}
+        .controls button{background:linear-gradient(45deg,#2E7D32,#388E3C);color:#FFF;border:none;padding:7px 14px;border-radius:18px;cursor:pointer;font-size:11pt;font-weight:600;transition:.2s;box-shadow:0 2px 8px rgba(0,0,0,.07);white-space:nowrap;min-width:90px;flex-shrink:0}
+        .controls button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.13)}
+        .controls button:active{transform:translateY(0)}
+        .controls button.active{background:linear-gradient(45deg,#1B5E20,#2E7D32)}
+        .moving-dot,.game-target{width:18px;height:18px;background:radial-gradient(circle,#1B5E20,#2E7D32);border-radius:50%;position:absolute;transition:.7s;box-shadow:0 1px 6px rgba(27,94,32,.22)}
+        .game-target{width:26px;height:26px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700;color:#FFF;font-size:12pt}
+        .game-target:hover{transform:scale(1.13);box-shadow:0 4px 14px rgba(27,94,32,.4)}
+        .focus-circle{border:2px solid #2E7D32;border-radius:50%;position:absolute;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12pt;color:#2E7D32;transition:.4s;cursor:pointer}
+        .focus-circle:hover{background:rgba(46,125,50,.08);transform:scale(1.07)}
+        .blink-reminder{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2.2em;font-weight:700;color:#2E7D32;animation:pulse 1s infinite}
+        @keyframes pulse{0%,100%{opacity:.7;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}}
+        .instructions,.info-section,.progress{background:rgba(250,250,246,.95);border-radius:7px;padding:7px 10px;margin:2px 0;color:#222;box-shadow:0 1px 2px rgba(0,0,0,.02);font-size:11pt;max-width:98vw}
+        .timer{font-size:1.1em;font-weight:700;color:#2E7D32;margin:2px 0}
+        .reading-text{position:absolute;padding:8px;border-radius:7px;background:#FFF;box-shadow:0 2px 8px rgba(0,0,0,.07);transition:.4s;cursor:pointer;line-height:1.4;color:#333}
+        .reading-near{top:18%;left:50%;transform:translateX(-50%);max-width:220px;font-size:11px}
+        .reading-far{top:62%;left:50%;transform:translateX(-50%);max-width:300px;font-size:20px}
+        .info-content{display:none;text-align:left;padding:6px;margin-top:5px;background:rgba(250,250,246,.97);border-radius:6px;color:#222;font-size:11pt;line-height:1.4}
+        .info-section.active .info-content{display:block}
+        .info-section.active .toggle-icon{transform:rotate(180deg)}
+        .toggle-icon{display:inline-block;margin-left:7px;transition:.2s}
+        .info-section{background:rgba(250,250,246,.97);border-radius:7px;padding:7px 10px;margin:2px 0;color:#222;cursor:pointer;transition:.2s;border:1px solid rgba(46,125,50,.07);box-shadow:0 1px 2px rgba(0,0,0,.02);max-width:98vw}
+        .info-section:hover{background:rgba(250,250,246,1);box-shadow:0 1.5px 4px rgba(0,0,0,.04)}
+        @media (min-width:1200px){.controls{justify-content:center}}
+        @media (max-width:600px){
+            .top-panel{padding:1px 0 0 0}
+            .controls{gap:3px;padding:2px 25px}
+            .controls button{padding:6px 10px;font-size:10pt;min-width:70px}
+            .instructions,.info-section,.progress{font-size:10pt;padding:5px 8px;width:95%}
+            .game-target{width:22px;height:22px;font-size:10pt}
+            .focus-circle{font-size:10pt}
+            .blink-reminder{font-size:1.8em}
+            .reading-near{max-width:180px;font-size:9px}
+            .reading-far{max-width:250px;font-size:18px}
+            .info-content{font-size:10pt;padding:4px}
+            .timer{font-size:1em}
+        }
+        @media (max-width:400px){
+            .controls button{padding:5px 8px;font-size:9pt;min-width:60px}
+            .game-target{width:20px;height:20px;font-size:9pt}
+            .focus-circle{font-size:9pt}
+            .blink-reminder{font-size:1.6em}
+            .reading-near{max-width:150px;font-size:8px}
+            .reading-far{max-width:200px;font-size:16px}
+            .instructions,.info-section,.progress{width:92%}
+        }
+        @media (max-height:600px){.top-panel{gap:1px}.controls{gap:2px}.instructions,.info-section,.progress{margin:1px 0}.reading-near{top:15%}.reading-far{top:55%}}
+    </style>
+</head>
+<body>
+    <div class="top-panel">
+        <div class="info-section" onclick="toggleInfo(this)">
+            <strong>Рекомендации и инструкции</strong>
+            <span class="toggle-icon">▼</span>
+            <div class="info-content">
+                <div style="margin-bottom:10px">
+                    <strong>Показания:</strong> синдром сухого глаза, усталость от компьютера, синяки под глазами, профилактика близорукости.<br>
+                    <strong>Противопоказания:</strong> острые воспалительные заболевания глаз, повышенное внутриглазное давление, недавние операции на глазах. <br>
+                </div>
+                <div style="margin-bottom:10px">
+                    <strong>Положение:</strong><br>
+                    • 60 см от экрана<br>
+                    • Верхний край экрана на уровне глаз<br>
+                    • Взгляд 10-20° вниз<br>
+                    • Освещение равномерное<br>
+                    • Осанка прямая, плечи расслаблены<br>
+                    • Подбородок параллельно полу<br>
+                    • Двигайте только глазами<br>
+                </div>
+                <div>
+                    <strong>Упражнения:</strong><br>
+                    • <strong>🎮 Игровое слежение</strong> — развивает скорость реакции и точность движений глаз<br>
+                    • <strong>🎯 Фокусировка</strong> — тренирует четкость зрения и работу цилиарной мышцы<br>
+                    • <strong>💧 Моргание</strong> — увлажняет и очищает поверхность глаза, предотвращает сухость<br>
+                    • <strong>📖 Чтение</strong> — улучшает аккомодацию и способность быстро менять фокус<br>
+                    • <strong>♾️ Восьмерка</strong> — развивает координацию и гибкость глазных мышц<br>
+                    • <strong>🔍 Зум</strong> — тренирует гибкость фокусировки и работу аккомодационного аппарата<br>
+                    • <strong>⬆️ Стрелки</strong> — улучшает координацию глазных мышц и снижает усталость глаз при длительной работе<br>
+                    • <strong>🔄 Круги</strong> — тренирует плавность движений глаз и координацию<br>
+                    • <strong>🌊 Волна</strong> — тренирует гибкость глазных мышц и адаптацию к меняющимся траекториям<br>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress">
+            <div class="timer" id="timer">Выберите упражнение</div>
+        </div>
+        <div class="instructions" id="instructions">
+            <strong>Рекомендуется заниматься 2-3 раза в день</strong>
+        </div>
+        <div class="controls">
+            <button onclick="startAllExercises()">▶️ Все упражнения</button>
+            <button onclick="startTracking()">🎮 Игровое слежение</button>
+            <button onclick="startFocusing()">🎯 Фокусировка</button>
+            <button onclick="startBlinking()">💧 Моргание</button>
+            <button onclick="startReading()">📖 Чтение</button>
+            <button onclick="startZoom()">🔍 Зум</button>
+            <button onclick="startEight()">♾️ Восьмерка</button>
+            <button onclick="startArrows()">⬆️ Стрелки</button>
+            <button onclick="startCircular()">🔄 Круги</button>
+            <button onclick="startWave()">🌊 Волна</button>
+        </div>
+    </div>
+    <div class="exercise-area" id="exerciseArea">
+        <div style="font-size:1em;color:#666;margin-top:60px;text-align:center;">
+            Выберите упражнение для начала
+        </div>
+    </div>
+    <script>
+        let c=null,t=null,r=0,n='',a=!1,isBreak=!1,breakTimer=null;
+        let readingTexts=["Регулярные упражнения для глаз помогают сохранить зрение.","Каждые 20 минут делайте перерыв на 20 секунд.","Гимнастика для глаз укрепляет глазные мышцы.","Пальминг помогает расслабить глазные мышцы.","Массаж глаз улучшает кровообращение.","Контрастный душ для глаз снимает усталость.","Упражнение 'восьмерка' тренирует глазные мышцы.","Фокусировка на близких и дальних предметах улучшает аккомодацию.","Круговые движения глазами укрепляют мышцы.","Моргание увлажняет и очищает поверхность глаза.","Морковь полезна для зрения благодаря бета-каротину.","Черника улучшает ночное зрение.","Омега-3 жирные кислоты поддерживают здоровье сетчатки.","Лютеин защищает от возрастных изменений зрения.","Зеаксантин поддерживает здоровье макулы.","Витамин А необходим для хорошего зрения.","Витамин С укрепляет сосуды глаз.","Витамин Е защищает от окислительного стресса.","Цинк важен для здоровья глаз.","Селен помогает предотвратить катаракту.","Здоровый сон важен для восстановления зрения.","Регулярные прогулки полезны для глаз.","Правильная осанка важна для здоровья глаз.","Увлажнение глаз помогает предотвратить сухость.","Регулярные проверки зрения помогают выявить проблемы.","Активный образ жизни улучшает кровоснабжение глаз.","Отказ от курения снижает риск заболеваний глаз.","Контроль веса помогает предотвратить диабетическую ретинопатию.","Управление стрессом важно для здоровья глаз.","Регулярные физические упражнения улучшают зрение."];
+        let usedTexts=new Set(),allMode=!1,allQueue=[],allIdx=0;
+        function getRandomText(){if(usedTexts.size>=readingTexts.length)usedTexts.clear();let t=readingTexts.filter(t=>!usedTexts.has(t));let r=t[Math.floor(Math.random()*t.length)];usedTexts.add(r);return r}
+        const u=()=>{if(r>0){r--;const m=Math.floor(r/60),s=r%60;let x=`${n} - Осталось: ${m}:${s.toString().padStart(2,'0')}`;document.getElementById('timer').textContent=x;if(r===0){if(!isBreak)startBreak();else endBreak()}}};
+        const startBreak=()=>{isBreak=!0;r=30;n='⏸️ Перерыв';document.getElementById('instructions').innerHTML='<strong>⏸️ Перерыв:</strong> Отдохните 30 секунд. Прикройте глаза ладонями закрыв доступ свету, не давите на них. (Пальминг)';document.getElementById('exerciseArea').innerHTML=`<div style="font-size:1.2em;color:#666;margin-top:100px">⏸️ Перерыв<br><small style="color:#999">Отдохните 30 секунд</small></div>`};
+        const endBreak=()=>{isBreak=!1;s();document.getElementById('exerciseArea').innerHTML=`<div style="font-size:1.2em;color:#666;margin-top:100px">🎉 Перерыв завершен!<br><small style="color:#999">Выберите следующее упражнение</small></div>`;document.getElementById('instructions').innerHTML='<strong>🎉 Отлично!</strong> Выберите следующее упражнение.';document.getElementById('timer').textContent='Выберите упражнение';document.getElementById('timer').style.color='#2E7D32';if(allMode&&allQueue.length){setTimeout(()=>{allQueue[allIdx++]();},500);if(allIdx>=allQueue.length){allMode=!1;allQueue=[];allIdx=0;}}};
+        const s=()=>{if(c)clearInterval(c);if(t)clearInterval(t);if(breakTimer)clearInterval(breakTimer);c=t=breakTimer=null;r=0};
+        function startAllExercises(){allQueue=[startTracking,startFocusing,startBlinking,startReading,startEight,startZoom,startArrows,startCircular,startWave];allIdx=0;allMode=!0;function next(){if(allIdx>=allQueue.length){allMode=!1;allQueue=[];allIdx=0;document.getElementById('instructions').innerHTML='<strong>Все упражнения завершены!</strong>';document.getElementById('exerciseArea').innerHTML='<div style="font-size:1.2em;color:#666;margin-top:100px">Выберите упражнение для повторения</div>';document.getElementById('timer').textContent='Выберите упражнение';return}allQueue[allIdx++]()}next()}
+        function toggleInfo(e){e.classList.toggle('active')}
+        function startTracking(){if(isBreak)return;s();n='🎮 Игровое слежение';r=90;a=!1;document.getElementById('instructions').innerHTML='<strong>🎮 Игровое слежение:</strong> Кликайте по мишеням!';const x=document.getElementById('exerciseArea');x.innerHTML='';let score=0,targetCount=0;function m(){if(isBreak||r<=0)return;targetCount++;const t=document.createElement('div');t.className='game-target';t.textContent=targetCount;t.style.left=Math.random()*(x.offsetWidth-50)+'px';t.style.top=(50+Math.random()*(x.offsetHeight-100))+'px';t.onclick=()=>{if(isBreak||r<=0)return;score++;t.style.background='radial-gradient(circle,#2E7D32,#388E3C)';t.textContent='✓';setTimeout(()=>t.remove(),300);const p=x.querySelector('.score-display')||document.createElement('div');p.className='score-display';p.style.cssText='position:absolute;top:10px;right:10px;font-size:18px;font-weight:700;color:#2E7D32';p.textContent=`Попаданий: ${score}/${targetCount}`;if(!x.querySelector('.score-display'))x.appendChild(p)};x.appendChild(t);setTimeout(()=>{if(t.parentNode){t.style.background='radial-gradient(circle,#999,#666)';setTimeout(()=>t.remove(),500)}},2500)}c=setInterval(m,1200);t=setInterval(u,1000)}
+        function startFocusing(){if(isBreak)return;s();n='🎯 Фокусировка';r=90;a=!1;document.getElementById('instructions').innerHTML='<strong>🔍 Фокусировка:</strong> Кликайте по кружкам!';const x=document.getElementById('exerciseArea');x.innerHTML='';function m(){if(isBreak||r<=0)return;const t=document.createElement('div');t.className='focus-circle';const s=40+Math.random()*60;t.style.width=s+'px';t.style.height=s+'px';t.style.left=Math.random()*(x.offsetWidth-s)+'px';t.style.top=(50+Math.random()*(x.offsetHeight-s-50))+'px';t.textContent=Math.floor(s);t.onclick=()=>{if(isBreak||r<=0)return;t.style.background='rgba(46,125,50,.3)';setTimeout(()=>t.remove(),200)};x.appendChild(t);setTimeout(()=>t.parentNode&&t.remove(),3000)}c=setInterval(m,1500);t=setInterval(u,1000)}
+        function startBlinking(){if(isBreak)return;s();n='👁️ Моргание';r=60;a=!1;document.getElementById('instructions').innerHTML='<strong>💧 Моргание:</strong> Моргайте по команде!';const x=document.getElementById('exerciseArea');x.innerHTML='';let b=0;function m(){if(isBreak||r<=0)return;b++;const t=document.createElement('div');t.className='blink-reminder';t.textContent=`МОРГНИТЕ! (${b}/20)`;x.appendChild(t);setTimeout(()=>t.remove(),2500)}c=setInterval(m,3000);t=setInterval(u,1000)}
+        function startReading(){if(isBreak)return;s();n='📖 Чтение';r=120;a=!1;document.getElementById('instructions').innerHTML='<strong>📖 Чтение:</strong> Читайте тексты разного размера!';const x=document.getElementById('exerciseArea');x.innerHTML='';const nearText=document.createElement('div');nearText.className='reading-text reading-near';const farText=document.createElement('div');farText.className='reading-text reading-far';x.appendChild(nearText);x.appendChild(farText);let isNear=!0;nearText.textContent=getRandomText();farText.textContent=getRandomText();function w(){if(isBreak||r<=0)return;if(readingTexts.length===0)return;if(isNear){nearText.style.opacity='.4';nearText.style.transform='translateX(-50%) scale(.95)';farText.style.opacity='1';farText.style.transform='translateX(-50%) scale(1.05)';farText.style.boxShadow='0 6px 25px rgba(46,125,50,.3)';farText.textContent=getRandomText();nearText.style.boxShadow='0 2px 10px rgba(0,0,0,.1)'}else{farText.style.opacity='.4';farText.style.transform='translateX(-50%) scale(.95)';nearText.style.opacity='1';nearText.style.transform='translateX(-50%) scale(1.05)';nearText.style.boxShadow='0 6px 25px rgba(46,125,50,.3)';nearText.textContent=getRandomText();farText.style.boxShadow='0 2px 10px rgba(0,0,0,.1)'}isNear=!isNear}c=setInterval(w,3000);t=setInterval(u,1000)}
+        function startEight(){if(isBreak)return;s();n='♾️ Восьмерка';r=120;document.getElementById('instructions').innerHTML='<strong>♾️ Восьмерка:</strong> Следите глазами за движущейся точкой по траектории восьмерки.';const area=document.getElementById('exerciseArea');area.innerHTML=`<div class="moving-dot" style="left:50%;top:50%;transform:translate(-50%,-50%)"></div>`;let angle=0;const dot=area.querySelector('.moving-dot');const w=area.offsetWidth,h=area.offsetHeight;const maxRadiusX=w*0.45;const maxRadiusY=h*0.4;c=setInterval(()=>{angle+=.03;const x=w/2+Math.sin(angle)*maxRadiusX;const y=h/2+Math.sin(angle*2)*maxRadiusY;dot.style.left=x+'px';dot.style.top=y+'px'},30);t=setInterval(u,1000)}
+        function startZoom(){if(isBreak)return;s();n='🔍 Зум';r=60;document.getElementById('instructions').innerHTML='<strong>🔍 Зум:</strong> Следите за изменением размера круга.';const area=document.getElementById('exerciseArea');area.innerHTML=`<div style="width:100px;height:100px;border-radius:50%;background:#2E7D32;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);transition:1s"></div>`;const circle=area.querySelector('div');let isGrowing=!0;let size=100;c=setInterval(()=>{if(isGrowing){size+=20;if(size>=300)isGrowing=!1}else{size-=20;if(size<=100)isGrowing=!0}circle.style.width=size+'px';circle.style.height=size+'px'},1000);t=setInterval(u,1000)}        
+        function startArrows(){if(isBreak)return;s();n='⬆️ Стрелки';r=60;document.getElementById('instructions').innerHTML='<strong>⬆️ Стрелки:</strong> Следите глазами за быстро перемещающимся кружком. Не двигайте головой, только глазами!';const area=document.getElementById('exerciseArea');area.innerHTML='<div class="moving-dot" style="left:50%;top:50%;transform:translate(-50%,-50%)"></div>';const dot=area.querySelector('.moving-dot');const w=area.offsetWidth,h=area.offsetHeight;let mode=0,count=0;function move(){if(r<=0){clearInterval(c);return}let x,y;if(count < 20){ mode = 0; } else if (count < 40){ mode = 1; } else if (count < 50){ mode = 2; } else { mode = 3; }if(mode===0){y=count%2===0?10:h-10;x=w/2-10}else if(mode===1){x=count%2===0?10:w-10;y=h/2-10}else if(mode===2){x=count%2===0?10:w-10;y=count%2===0?10:h-10}else if(mode===3){x=count%2===0?w-10:10;y=count%2===0?10:h-10}dot.style.left=x+'px';dot.style.top=y+'px';count++;}c=setInterval(move,1000);t=setInterval(u,1000)} //Крест(верх-вниз, лево-право) и Диагональ(Лево-вверх, Право-вниз и наоборот) 
+        function startCircular(){if(isBreak)return;s();n='🔄 Круги';r=60;document.getElementById('instructions').innerHTML='<strong>🔄 Круги:</strong> Следите глазами за кругами, вращающимися по часовой и против часовой стрелки.';const area=document.getElementById('exerciseArea');area.innerHTML=`<div class="moving-dot" style="left:50%;top:50%;transform:translate(-50%,-50%)"></div>`;let angle=0;let currentDirection=1;const dot=area.querySelector('.moving-dot');const w=area.offsetWidth,h=area.offsetHeight;const radius=Math.min(w,h)*0.9;c=setInterval(()=>{if(r===30){currentDirection*=-1}angle+=currentDirection*0.05;const x=w/2+Math.cos(angle)*radius;const y=h/2+Math.sin(angle)*radius;dot.style.left=x+'px';dot.style.top=y+'px'},30);t=setInterval(u,1000)}
+        function startWave(){if(isBreak)return;s();n='🌊 Волна';r=60;document.getElementById('instructions').innerHTML='<strong>🌊 Волна:</strong> Следите за точкой, движущейся по волнообразной траектории.';const area=document.getElementById('exerciseArea');area.innerHTML='<div class="moving-dot" style="left:10%;top:50%;transform:translate(-50%,-50%)"></div>';const dot=area.querySelector('.moving-dot');const w=area.offsetWidth,h=area.offsetHeight;let xPos=0;let directionX=1;let amplitude=h*0.5;let frequency=0.01;c=setInterval(()=>{xPos+=directionX*3;if(xPos>w||xPos<0)directionX*=-1;const yPos=h/2+Math.sin(xPos*frequency)*amplitude;dot.style.left=xPos+'px';dot.style.top=yPos+'px'},30);t=setInterval(u,1000)}
+        function resizeExerciseArea(){const topPanel=document.querySelector('.top-panel');const area=document.getElementById('exerciseArea');const panelHeight=topPanel.offsetHeight;area.style.top=panelHeight+'px';area.style.height='calc(100vh - '+panelHeight+'px)'}
+        window.addEventListener('resize',resizeExerciseArea);window.addEventListener('DOMContentLoaded',resizeExerciseArea);
+
+        // Счетчик посещений
+        (() => {
+            const visits = parseInt(localStorage.getItem('visits') || '0');
+            localStorage.setItem('visits', visits + 1);
+            const counter = document.createElement('div');
+            counter.style.cssText = 'position:fixed;bottom:10px;right:10px;font-size:12px;color:#666;opacity:0.7';
+            counter.textContent = `Посещений: ${visits + 1}`;
+            document.body.appendChild(counter);
+        })();
+    </script>
+</body>
+</html>
